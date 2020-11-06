@@ -88,6 +88,13 @@ footer {
     margin: calc(2 * var(--spacing-unit)) 0;
 }
 
+.headers h3 {
+    color: var(--grey-color);
+    line-height: 1em;
+    font-weight: normal;
+    font-style: italic;
+}
+
 .body {
     padding: var(--spacing-unit);
     margin: var(--spacing-unit);
