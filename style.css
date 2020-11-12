@@ -88,9 +88,8 @@ footer {
     margin: calc(2 * var(--spacing-unit)) 0;
 }
 
-.headers h3 {
+h3 {
     color: var(--grey-color);
-    line-height: 1em;
     font-weight: normal;
     font-style: italic;
 }
@@ -102,6 +101,11 @@ footer {
 
 .body h1, .body h2, .body h3, .body h4, .body h5, .body h6 {
     margin-bottom: 0.5em;
+    text-align: center;
+}
+
+.body a {
+    border-bottom: 1px solid #DDD;
 }
 
 .body img {
