@@ -1,0 +1,150 @@
+
+<!-- saved from url=(0049)https://www.alexboisvert.com/apps/puz_to_pdf_bwp/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BWP: Create PDF</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.submit {    max-width: 170px;   width: 170px;   text-align: center;   padding: 0; }
+.head {font-size: 14pt; color: #0080c8; font-weight: bold; font-family: verdana}
+.entries {font-size: 12pt; color: #0080c8; font-weight: normal; font-family: verdana}
+</style>
+<script type="text/javascript">
+function set_bg(id, flag)
+{
+  var bg_color = "#F6C9CC";
+  if (flag) bg_color = "#FFEFD5";
+  document.getElementById(id).bgColor=bg_color;
+}
+
+function show_hide(elt) {
+  if(document.getElementById(elt).style.display=='none') {
+    document.getElementById(elt).style.display='';
+  } else {
+    document.getElementById(elt).style.display='none'
+  }
+}
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
+// Helper function to get the next Friday (or whatever)
+function getNextDayOfWeek(date, dayOfWeek) {
+    // Code to check that date and dayOfWeek are valid left as an exercise ;)
+    var resultDate = new Date(date.getTime());
+    resultDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+    return resultDate;
+}
+
+</script>
+</head>
+<body data-new-gr-c-s-check-loaded="14.994.0" data-gr-ext-installed="">
+
+<!-- Insert the page content here -->
+<div id="main"><h2>PUZ to PDF Converter</h2>
+Browse to a file in Across Lite binary (.puz) format and this app
+will create a PDF for printing and solving.  
+<br><br>
+This application uses the JavaScript File API.  Your files are not uploaded to our server at any point.
+<br><br>
+
+<input type="file" id="files" name="files" accept=".puz">
+<output id="list"></output>
+<br><br>
+<input type="date" id="puzzle_date" name="puzzle_date">
+<script type="text/javascript">
+    var elt = document.getElementById('puzzle_date');
+    var today = new Date();
+    var next_friday = getNextDayOfWeek(today, 5);
+    elt.value = formatDate(next_friday);
+</script>
+
+<br><br>
+<button title="Show/hide options (advanced)" type="button" onclick="show_hide(&#39;options_div&#39;)">Show/hide options (advanced)</button>
+<div id="options_div" style="display:none">
+  <textarea id="options_textarea" rows="20" cols="30">{
+   "margin":40,
+   "title_pt":12,
+   "author_pt":12,
+   "copyright_pt":12,
+   "num_columns":null,
+   "num_full_columns":null,
+   "column_padding":10,
+   "gray":0.2,
+   "vertical_separator":5,
+   "max_clue_pt":14,
+   "min_clue_pt":5,
+   "grid_padding":5
+}
+  </textarea>
+</div>
+<br>
+<script>
+// Check for the various File API support.
+if (window.File && window.FileReader && window.FileList && window.Blob) {
+  // Success! All the File APIs are supported.
+} else {
+	document.getElementById('fileApiWarning').innerHTML ='The File APIs are not fully supported in this browser.  Try using Firefox or Chrome.';
+}
+</script>
+
+<script>
+function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+    // files is a FileList of File objects.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+
+        // Only process small files.
+        if (f.size >= 7500) {
+            alert('This file is too big.');
+            continue;
+        }
+        if (f) {
+            var r = new FileReader();
+            var filename = f.name;
+            var filename_no_extension = filename.replace(/\.[^/.]+$/, "");
+            var outname = filename_no_extension + '.pdf';
+
+            // Read in options
+            options_obj = JSON.parse(document.getElementById('options_textarea').value);
+            options_obj['outfile'] = outname;
+            options_obj['puzzle_date'] = document.getElementById('puzzle_date').value;
+            //console.log(options_obj['puzzle_date']);
+
+            r.onload = (function(theFile) {
+                return function(e) { 
+                    var contents = e.target.result;
+                    var puzdata = PUZAPP.parsepuz(contents);
+                    //puzdata_to_pdf_bwp(puzdata,{outfile: outname});
+                    puzdata_to_pdf_bwp(puzdata,options_obj);
+                };
+            })(f);
+            r.readAsBinaryString(f);
+        } else { 
+            alert("Failed to load file");
+        }
+    }
+}
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+<!--<script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>-->
+<script src="./BWP_ Create PDF_files/jspdf.min.js"></script>
+<script src="./BWP_ Create PDF_files/puz.js" type="text/javascript"></script>
+<script src="./BWP_ Create PDF_files/puz_functions_bwp.js" type="text/javascript"></script>
+</div>
+
+
+</body></html>
