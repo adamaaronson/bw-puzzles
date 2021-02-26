@@ -11,9 +11,8 @@
 
 // Remainder of this code (c) 2016-2020 Alex Boisvert
 // licensed under MIT license
-
 var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
-(function () {
+(function() {
     "use strict";
 
     // return whether browser supports local storage
@@ -54,7 +53,8 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
     // array exhausted or next element from array would cause accumulator to exceed threshold
     // returns accumulator. arr is destructively modified, reflecting all the pops.
     function popWhileLessThanOrEqual(threshold, arr) {
-        var acc = 0, l;
+        var acc = 0,
+            l;
         for (l = arr.length - 1; l >= 0 && arr[l] + acc <= threshold; --l) {
             acc += arr.pop();
         }
@@ -63,7 +63,8 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
 
     // return sum of all numbers in array
     function sumArray(arr) {
-        var acc = 0, i;
+        var acc = 0,
+            i;
         for (i = 0; i < arr.length; ++i) {
             acc += arr[i];
         }
@@ -97,40 +98,40 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
         //      direction, highlightWordExtent, highlightClueId, lastClickX, lastClickY
 
         // return key for putting state into local storage
-        this.storageKey = function () {
+        this.storageKey = function() {
             return "xroz." + this.url + ".state";
         };
 
-        this.innerHeight = function () {
+        this.innerHeight = function() {
             return document.getElementsByTagName("html")[0].clientHeight - this.BODY_MARGIN * 2;
         };
-        this.innerWidth = function () {
+        this.innerWidth = function() {
             return document.getElementsByTagName("html")[0].clientWidth - this.BODY_MARGIN * 2;
         };
-        this.toIndex = function (x, y) {
+        this.toIndex = function(x, y) {
             return y * this.width + x;
         };
-        this.fromIndex = function (index) {
+        this.fromIndex = function(index) {
             return [index % this.width, Math.floor(index / this.width)];
         };
-        this.isBlack = function (x, y) {
+        this.isBlack = function(x, y) {
             return this.solution.charAt(this.toIndex(x, y)) === '.';
         };
-        this.cursorBlack = function () {
+        this.cursorBlack = function() {
             return this.isBlack(this.cursorX, this.cursorY);
         };
-        this.circled = function (index) {
+        this.circled = function(index) {
             return this.gext !== undefined && (getByte(this.gext, index) & 0x80) !== 0;
         };
-        this.startDownWord = function (x, y) {
+        this.startDownWord = function(x, y) {
             return (y === 0 || this.isBlack(x, y - 1)) && y < this.height - 1 && !this.isBlack(x, y) && !this.isBlack(x, y + 1);
         };
-        this.startAcrossWord = function (x, y) {
+        this.startAcrossWord = function(x, y) {
             return (x === 0 || this.isBlack(x - 1, y)) && x < this.width - 1 && !this.isBlack(x, y) && !this.isBlack(x + 1, y);
         };
 
         // return word associated with (x,y) based upon current direction, or 0 if N/A
-        this.getWordNbr = function (x, y) {
+        this.getWordNbr = function(x, y) {
             var direction = this.direction,
                 index = this.toIndex(x, y);
             if (direction === this.DIRECTION_UNKNOWN) {
@@ -235,7 +236,8 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
             retval.solution = retval.grid;
         }
         cksum = cksum_region(bytes, grid_offset, wh, cksum);
-        var acrossWords = {}, downWords = {};
+        var acrossWords = {},
+            downWords = {};
         for (y = 0; y < h; y++) {
             for (x = 0; x < w; x++, index++) {
                 sdw = retval.startDownWord(x, y);
@@ -313,8 +315,7 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
                     all_clues = all_clues.slice(1, 1 + clues_remaining);
                     // Start the entry
                     across_entries[across_clue_number] = retval.solution[this_index];
-                }
-                else if (!isBlack) {
+                } else if (!isBlack) {
                     across_entries[across_clue_number] += retval.solution[this_index];
                 }
                 if (sdw) {
@@ -345,8 +346,7 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
                     down_clue_number = downWordNbrs[this_index];
                     // Start the entry
                     down_entries[down_clue_number] = retval.solution[this_index];
-                }
-                else if (!isBlack) {
+                } else if (!isBlack) {
                     down_entries[down_clue_number] += retval.solution[this_index];
                 }
                 retval.circles[this_index] = retval.circled(this_index);
@@ -358,38 +358,38 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
         retval.down_entries = down_entries;
 
         // All entries
-		var all_entries = [];
-		var obj, mynum;
-		for (x=0; x<w; x++) {
-			for (y=0; y<h; y++) {
-				var myindex = retval.toIndex(x, y);
-				if (retval.startAcrossWord(x,y)) {
-					mynum = retval.acrossWordNbrs[myindex];
-					obj = {};
-					obj['Number'] = mynum;
-					obj['Direction'] = 'Across';
-					obj['Clue'] = across_clues[mynum];
-					obj['Entry'] = across_entries[mynum];
-					obj['x'] = x;
-					obj['y'] = y;
-					obj['Grid_Order'] = retval.toIndex(x, y);
-					all_entries.push(obj);
-				}
-				if (retval.startDownWord(x,y)) {
-					mynum = retval.downWordNbrs[myindex];
-					obj = {};
-					obj['Number'] = mynum;
-					obj['Direction'] = 'Down';
-					obj['Clue'] = down_clues[mynum];
-					obj['Entry'] = down_entries[mynum];
-					obj['x'] = x;
-					obj['y'] = y;
-					obj['Grid_Order'] = retval.toIndex(x, y);
-					all_entries.push(obj);
-				}
-			}
-		}
-		retval.all_entries = all_entries;
+        var all_entries = [];
+        var obj, mynum;
+        for (x = 0; x < w; x++) {
+            for (y = 0; y < h; y++) {
+                var myindex = retval.toIndex(x, y);
+                if (retval.startAcrossWord(x, y)) {
+                    mynum = retval.acrossWordNbrs[myindex];
+                    obj = {};
+                    obj['Number'] = mynum;
+                    obj['Direction'] = 'Across';
+                    obj['Clue'] = across_clues[mynum];
+                    obj['Entry'] = across_entries[mynum];
+                    obj['x'] = x;
+                    obj['y'] = y;
+                    obj['Grid_Order'] = retval.toIndex(x, y);
+                    all_entries.push(obj);
+                }
+                if (retval.startDownWord(x, y)) {
+                    mynum = retval.downWordNbrs[myindex];
+                    obj = {};
+                    obj['Number'] = mynum;
+                    obj['Direction'] = 'Down';
+                    obj['Clue'] = down_clues[mynum];
+                    obj['Entry'] = down_entries[mynum];
+                    obj['x'] = x;
+                    obj['y'] = y;
+                    obj['Grid_Order'] = retval.toIndex(x, y);
+                    all_entries.push(obj);
+                }
+            }
+        }
+        retval.all_entries = all_entries;
 
         PUZAPP.puzdata = retval;
 
@@ -417,7 +417,7 @@ var ActiveXObject, parsedPuz, filecontents, PUZAPP = {};
  * https://github.com/rjkat/anagrind/blob/master/client/js/puz.js
  * Released under MIT License
  * https://opensource.org/licenses/MIT
-**/
+ **/
 
 // Strings in puz files are ISO-8859-1.
 
@@ -481,7 +481,7 @@ function readHeader(buf) {
 // My windows-1252 encoding function which probably doesn't work?
 function windows1252_encode(s) {
     var ret = new Uint8Array(s.length);
-    for (var i=0; i<s.length; i++) {
+    for (var i = 0; i < s.length; i++) {
         ret[i] = s.charCodeAt(i);
     }
     return ret;
@@ -549,23 +549,23 @@ function splitNulls(buf, encoding) {
 }
 
 function checksum(base, c, len) {
-  if (c === undefined)
-    c = 0x0000;
-  
-  if (base === undefined)
+    if (c === undefined)
+        c = 0x0000;
+
+    if (base === undefined)
+        return c;
+
+    if (len === undefined)
+        len = base.length;
+
+    for (let i = 0; i < len; i++) {
+        if (c & 0x0001)
+            c = ((c >>> 1) + 0x8000) & 0xFFFF;
+        else
+            c = (c >>> 1);
+        c = (c + base[i]) & 0xFFFF;
+    }
     return c;
-
-  if (len === undefined)
-    len = base.length;
-
-  for (let i = 0; i < len; i++) {
-    if (c & 0x0001)
-      c = ((c >>> 1) + 0x8000) & 0xFFFF;
-    else
-      c = (c >>> 1);
-    c = (c + base[i]) & 0xFFFF;
-  }
-  return c;
 }
 
 function concatBytes(a, b) {
@@ -579,14 +579,14 @@ function writeCheatChecksum(buf, offset, key, checksums) {
     const n = checksums.length;
     for (let shift = 0; shift < 2; shift++) {
         for (let i = 0; i < checksums.length; i++) {
-            const c = (checksums[i] & (0xFF << 8*shift)) >>> 8*shift;
-            buf[offset + i + n*shift] = key.charCodeAt(i + n*shift) ^ c;
+            const c = (checksums[i] & (0xFF << 8 * shift)) >>> 8 * shift;
+            buf[offset + i + n * shift] = key.charCodeAt(i + n * shift) ^ c;
         }
     }
 }
 
 function writeUInt16LE(buf, offset, val) {
-    buf[offset + 0] =  val & 0x00FF;
+    buf[offset + 0] = val & 0x00FF;
     buf[offset + 1] = (val & 0xFF00) >> 8;
 }
 
@@ -627,7 +627,7 @@ class PuzPayload {
         } else {
             strings += '\x00';
         }
-        
+
 
         return puzEncode(strings);
     }
@@ -667,7 +667,7 @@ class PuzPayload {
     buildHeader() {
         const i = PUZ_HEADER_CONSTANTS.offsets;
         const header = new Uint8Array(PUZ_HEADER_CONSTANTS.lengths.HEADER);
-        
+
         const encoder = new TextEncoder();
 
         // metadata
@@ -729,21 +729,20 @@ function puzapp_to_puzpayload(puzdata) {
     var pp_clues = [];
     // Sort the entries by number then direction
     puzdata.all_entries.sort(function(x, y) {
-       if (x.Number < y.Number) {
-           return -1;
-       } else if (x.Number > y.Number) {
-           return 1;
-       }
-       else {
-           if (x.Direction < y.Direction) {
-               return -1;
-           } else if (x.Direction > y.Direction) {
-               return 1;
-           }
-       }
-       return 0;
+        if (x.Number < y.Number) {
+            return -1;
+        } else if (x.Number > y.Number) {
+            return 1;
+        } else {
+            if (x.Direction < y.Direction) {
+                return -1;
+            } else if (x.Direction > y.Direction) {
+                return 1;
+            }
+        }
+        return 0;
     });
-    for (var i=0; i<puzdata.all_entries.length; i++) {
+    for (var i = 0; i < puzdata.all_entries.length; i++) {
         pp_clues.push(puzdata.all_entries[i].Clue);
     }
     return new PuzPayload(meta, pp_clues, puzdata.solution, puzdata.grid);
